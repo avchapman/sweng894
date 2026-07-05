@@ -4,10 +4,10 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "AI-Powered Childcare Platform API",
+      title: "BrightPath API",
       version: "1.0.0",
       description:
-        "API documentation for the AI-Powered Childcare and Education Business Management Platform. This API supports authentication, role-based access control, organization-level data separation, child profile management, and enrollment request workflows.",
+        "REST API for the BrightPath Childcare Management Platform. Supports authentication, organization management, child profiles, and enrollment workflows.",
       contact: {
         name: "Abby Chapman",
         email: "avc6698@psu.edu",

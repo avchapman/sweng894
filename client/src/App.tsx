@@ -1,21 +1,22 @@
-import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import AppLayout from "./components/AppLayout";
+import DashboardPage from "./pages/DashboardPage";
+import LoginPage from "./pages/LoginPage";
+import ChildProfilesPage from "./pages/ChildProfilesPage";
+import EnrollmentRequestsPage from "./pages/EnrollmentRequestsPage";
 
-function App() {
-  const [status, setStatus] = useState("Loading...");
-
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/health`)
-      .then((res) => res.json())
-      .then((data) => setStatus(data.status))
-      .catch(() => setStatus("API error"));
-  }, []);
-
+export default function App() {
   return (
-    <div style={{ padding: "2 rem", fontFamily: "Arial" }}>
-      <h1>AI-Powered Childcare Platform</h1>
-      <p>Backend status: {status}</p>
-    </div>
-  )
-}
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
 
-export default App;
+      <Route element={<AppLayout />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/child-profiles" element={<ChildProfilesPage />} />
+        <Route path="/enrollment" element={<EnrollmentRequestsPage />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  );
+}
