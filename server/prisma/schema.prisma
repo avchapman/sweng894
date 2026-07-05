@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  PARENT
+}
+
+model Organization {
+  id                 String              @id @default(uuid())
+  name               String              @unique
+  users              User[]
+  childProfiles      ChildProfile[]
+  enrollmentRequests EnrollmentRequest[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model User {
+  id             String        @id @default(uuid())
+  firstName      String
+  lastName       String
+  email          String        @unique
+  passwordHash   String
+  role           UserRole
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model ChildProfile {
+  id             String        @id @default(uuid())
+  firstName      String
+  lastName       String
+  dateOfBirth    DateTime?
+  notes          String?
+  archived       Boolean       @default(false)
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model EnrollmentRequest {
+  id             String        @id @default(uuid())
+  parentName     String
+  email          String
+  phone          String?
+  childName      String
+  childAge       Int?
+  message        String?
+  status         String        @default("NEW")
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
