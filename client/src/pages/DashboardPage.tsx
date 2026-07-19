@@ -9,6 +9,7 @@ import {
   Stack,
   Typography,
   Button,
+  Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ChildCareIcon from "@mui/icons-material/ChildCare";
@@ -38,9 +39,11 @@ export default function DashboardPage() {
     EnrollmentRequest[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   async function loadDashboardData() {
     setLoading(true);
+    setError("");
 
     try {
       const [childrenResponse, enrollmentResponse] = await Promise.all([
@@ -50,6 +53,8 @@ export default function DashboardPage() {
 
       setChildren(childrenResponse.data);
       setEnrollmentRequests(enrollmentResponse.data);
+    } catch {
+      setError("Unable to load dashboard data. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -83,6 +88,7 @@ export default function DashboardPage() {
       </Box>
 
       {loading && <LinearProgress />}
+      {error && <Alert severity="error">{error}</Alert>}
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6, lg: 3 }}>

@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  CircularProgress,
   MenuItem,
   Snackbar,
   Stack,
@@ -58,6 +59,7 @@ export default function EnrollmentRequestsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [updating, setUpdating] = useState(false);
 
   async function loadRequests() {
     setLoading(true);
@@ -79,6 +81,7 @@ export default function EnrollmentRequestsPage() {
   }, []);
 
   function openStatusDialog(request: EnrollmentRequest) {
+    setError("");
     setSelectedRequest(request);
     setStatus(request.status);
     setDialogOpen(true);
@@ -91,8 +94,10 @@ export default function EnrollmentRequestsPage() {
   }
 
   async function handleStatusUpdate() {
-    if (!selectedRequest) return;
+    if (!selectedRequest || updating) return;
 
+    setUpdating(true);
+    setError("");
     try {
       await apiClient.patch(`/enrollment/${selectedRequest.id}/status`, {
         status,
@@ -103,6 +108,8 @@ export default function EnrollmentRequestsPage() {
       await loadRequests();
     } catch {
       setError("Unable to update enrollment status.");
+    } finally {
+      setUpdating(false);
     }
   }
 
@@ -117,7 +124,12 @@ export default function EnrollmentRequestsPage() {
 
       {error && <Alert severity="error">{error}</Alert>}
 
-      {loading && <Typography color="text.secondary">Loading requests...</Typography>}
+      {loading && (
+        <Stack spacing={1.5} sx={{ py: 6, alignItems: "center" }}>
+          <CircularProgress aria-label="Loading enrollment requests" />
+          <Typography color="text.secondary">Loading enrollment requests…</Typography>
+        </Stack>
+      )}
 
       {!loading && requests.length === 0 && (
         <Card>
@@ -130,7 +142,7 @@ export default function EnrollmentRequestsPage() {
         </Card>
       )}
 
-      <Stack spacing={2}>
+      {!loading && <Stack spacing={2}>
         {requests.map((request) => (
           <Card key={request.id}>
             <CardContent>
@@ -216,9 +228,9 @@ export default function EnrollmentRequestsPage() {
             </CardContent>
           </Card>
         ))}
-      </Stack>
+      </Stack>}
 
-      <Dialog open={dialogOpen} onClose={closeStatusDialog} fullWidth maxWidth="xs">
+      <Dialog open={dialogOpen} onClose={updating ? undefined : closeStatusDialog} fullWidth maxWidth="xs">
         <DialogTitle>Update Enrollment Status</DialogTitle>
 
         <DialogContent>
@@ -246,6 +258,7 @@ export default function EnrollmentRequestsPage() {
               label="Status"
               value={status}
               onChange={(event) => setStatus(event.target.value)}
+              disabled={updating}
               fullWidth
             >
               {statusOptions.map((option) => (
@@ -258,8 +271,13 @@ export default function EnrollmentRequestsPage() {
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={closeStatusDialog}>Cancel</Button>
-          <Button variant="contained" onClick={handleStatusUpdate}>
+          <Button onClick={closeStatusDialog} disabled={updating}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleStatusUpdate}
+            disabled={updating}
+            startIcon={updating ? <CircularProgress size={18} color="inherit" /> : undefined}
+          >
             Save Status
           </Button>
         </DialogActions>
@@ -269,8 +287,11 @@ export default function EnrollmentRequestsPage() {
         open={Boolean(successMessage)}
         autoHideDuration={3000}
         onClose={() => setSuccessMessage("")}
-        message={successMessage}
-      />
+      >
+        <Alert severity="success" variant="filled" onClose={() => setSuccessMessage("")}>
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }

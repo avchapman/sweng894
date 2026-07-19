@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -7,6 +7,9 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
+  InputAdornment,
+  CircularProgress,
   Snackbar,
   Stack,
   TextField,
@@ -15,6 +18,8 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import EditIcon from "@mui/icons-material/Edit";
+import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import type { GridColDef } from "@mui/x-data-grid";
 import apiClient from "../api/client";
@@ -57,6 +62,10 @@ export default function ChildProfilesPage() {
   const [formData, setFormData] = useState<ChildFormData>(emptyForm);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [archiveTarget, setArchiveTarget] = useState<ChildProfile | null>(null);
+  const [archiving, setArchiving] = useState(false);
 
   async function loadChildren() {
     setLoading(true);
@@ -78,12 +87,14 @@ export default function ChildProfilesPage() {
   }, []);
 
   function openCreateDialog() {
+    setError("");
     setSelectedChild(null);
     setFormData(emptyForm);
     setDialogOpen(true);
   }
 
   function openEditDialog(child: ChildProfile) {
+    setError("");
     setSelectedChild(child);
     setFormData({
       firstName: child.firstName,
@@ -101,11 +112,15 @@ export default function ChildProfilesPage() {
   }
 
   async function handleSubmit() {
+    if (saving) return;
+
     if (!formData.firstName || !formData.lastName) {
       setError("First name and last name are required.");
       return;
     }
 
+    setSaving(true);
+    setError("");
     try {
       if (selectedChild) {
         await apiClient.put(`/child-profiles/${selectedChild.id}`, formData);
@@ -136,22 +151,40 @@ export default function ChildProfilesPage() {
       closeDialog();
     } catch {
       setError("Unable to save child profile.");
+    } finally {
+      setSaving(false);
     }
   }
 
-  async function handleArchive(id: string) {
+  async function handleArchive() {
+    if (!archiveTarget || archiving) return;
+
+    setArchiving(true);
+    setError("");
     try {
-      await apiClient.patch(`/child-profiles/${id}/archive`);
+      await apiClient.patch(`/child-profiles/${archiveTarget.id}/archive`);
 
       setChildren((currentChildren) =>
-        currentChildren.filter((child) => child.id !== id)
+        currentChildren.filter((child) => child.id !== archiveTarget.id)
       );
 
       setSuccessMessage("Child profile archived successfully.");
+      setArchiveTarget(null);
     } catch {
       setError("Unable to archive child profile.");
+    } finally {
+      setArchiving(false);
     }
   }
+
+  const filteredChildren = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase();
+    if (!query) return children;
+
+    return children.filter(({ firstName, lastName }) =>
+      `${firstName} ${lastName}`.toLocaleLowerCase().includes(query)
+    );
+  }, [children, searchQuery]);
 
   const columns: GridColDef<ChildProfile>[] = [
     {
@@ -195,7 +228,10 @@ export default function ChildProfilesPage() {
           key="archive"
           icon={<ArchiveIcon />}
           label="Archive"
-          onClick={() => handleArchive(row.id)}
+          onClick={() => {
+            setError("");
+            setArchiveTarget(row);
+          }}
           showInMenu
         />,
       ],
@@ -223,9 +259,37 @@ export default function ChildProfilesPage() {
 
       {error && <Alert severity="error">{error}</Alert>}
 
+      <TextField
+        label="Search child profiles"
+        placeholder="Search by first or last name"
+        value={searchQuery}
+        onChange={(event) => setSearchQuery(event.target.value)}
+        sx={{ maxWidth: 480 }}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery ? (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="Clear search"
+                  edge="end"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <ClearIcon />
+                </IconButton>
+              </InputAdornment>
+            ) : undefined,
+          },
+        }}
+      />
+
       <Box sx={{ height: 520, bgcolor: "background.paper", borderRadius: 3 }}>
         <DataGrid
-          rows={children}
+          rows={filteredChildren}
           columns={columns}
           loading={loading}
           disableRowSelectionOnClick
@@ -237,6 +301,22 @@ export default function ChildProfilesPage() {
               },
             },
           }}
+          slots={{
+            noRowsOverlay: () => (
+              <Stack
+                sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}
+              >
+                <Typography sx={{ fontWeight: 700 }}>
+                  {searchQuery.trim() ? "No matching child profiles" : "No child profiles yet"}
+                </Typography>
+                <Typography color="text.secondary">
+                  {searchQuery.trim()
+                    ? "Try a different first or last name."
+                    : "Add a child profile to get started."}
+                </Typography>
+              </Stack>
+            ),
+          }}
           sx={{
             border: 0,
             "& .MuiDataGrid-columnHeaders": {
@@ -246,7 +326,7 @@ export default function ChildProfilesPage() {
         />
       </Box>
 
-      <Dialog open={dialogOpen} onClose={closeDialog} fullWidth maxWidth="sm">
+      <Dialog open={dialogOpen} onClose={saving ? undefined : closeDialog} fullWidth maxWidth="sm">
         <DialogTitle>
           {selectedChild ? "Edit Child Profile" : "Add Child Profile"}
         </DialogTitle>
@@ -302,9 +382,43 @@ export default function ChildProfilesPage() {
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={closeDialog}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>
+          <Button onClick={closeDialog} disabled={saving}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={saving}
+            startIcon={saving ? <CircularProgress size={18} color="inherit" /> : undefined}
+          >
             {selectedChild ? "Save Changes" : "Create Profile"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(archiveTarget)}
+        onClose={archiving ? undefined : () => setArchiveTarget(null)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Archive child profile?</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {archiveTarget?.firstName} {archiveTarget?.lastName} will be removed
+            from the active child-profile list.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setArchiveTarget(null)} disabled={archiving}>
+            Cancel
+          </Button>
+          <Button
+            color="warning"
+            variant="contained"
+            onClick={handleArchive}
+            disabled={archiving}
+            startIcon={archiving ? <CircularProgress size={18} color="inherit" /> : <ArchiveIcon />}
+          >
+            Archive
           </Button>
         </DialogActions>
       </Dialog>
@@ -313,8 +427,11 @@ export default function ChildProfilesPage() {
         open={Boolean(successMessage)}
         autoHideDuration={3000}
         onClose={() => setSuccessMessage("")}
-        message={successMessage}
-      />
+      >
+        <Alert severity="success" variant="filled" onClose={() => setSuccessMessage("")}>
+          {successMessage}
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }
