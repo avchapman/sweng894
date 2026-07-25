@@ -37,6 +37,11 @@ const options: swaggerJsdoc.Options = {
         description: "Public and administrative enrollment inquiry endpoints.",
       },
       {
+        name: "Schedules",
+        description:
+          "Protected organization-scoped scheduling and calendar endpoints.",
+      },
+      {
         name: "Organizations",
         description:
           "Organization-level data management and access separation.",
@@ -175,6 +180,38 @@ const options: swaggerJsdoc.Options = {
             notes: {
               type: "string",
               example: "Peanut allergy",
+            },
+          },
+        },
+        ScheduleEntryRequest: {
+          type: "object",
+          required: ["title", "startTime", "endTime"],
+          properties: {
+            title: {
+              type: "string",
+              example: "Preschool Art Class",
+            },
+            description: {
+              type: "string",
+              example: "Weekly art activity for the preschool group.",
+            },
+            startTime: {
+              type: "string",
+              format: "date-time",
+              example: "2026-08-03T13:00:00.000Z",
+            },
+            endTime: {
+              type: "string",
+              format: "date-time",
+              example: "2026-08-03T14:00:00.000Z",
+            },
+            location: {
+              type: "string",
+              example: "Room 2",
+            },
+            childProfileIds: {
+              type: "array",
+              items: { type: "string" },
             },
           },
         },
