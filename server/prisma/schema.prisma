@@ -19,34 +19,62 @@ model Organization {
   users              User[]
   childProfiles      ChildProfile[]
   enrollmentRequests EnrollmentRequest[]
+  scheduleEntries    ScheduleEntry[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 }
 
 model User {
-  id             String        @id @default(uuid())
+  id             String       @id @default(uuid())
   firstName      String
   lastName       String
-  email          String        @unique
+  email          String       @unique
   passwordHash   String
   role           UserRole
   organizationId String
-  organization   Organization  @relation(fields: [organizationId], references: [id])
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model ScheduleEntry {
+  id             String               @id @default(uuid())
+  title          String
+  description    String?
+  startTime      DateTime
+  endTime        DateTime
+  location       String?
+  organizationId String
+  organization   Organization         @relation(fields: [organizationId], references: [id])
+  assignments    ScheduleAssignment[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([organizationId, startTime])
+}
+
+model ScheduleAssignment {
+  scheduleEntryId String
+  childProfileId  String
+  scheduleEntry   ScheduleEntry @relation(fields: [scheduleEntryId], references: [id], onDelete: Cascade)
+  childProfile    ChildProfile  @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
+
+  @@id([scheduleEntryId, childProfileId])
+  @@index([childProfileId])
 }
 
 model ChildProfile {
-  id             String        @id @default(uuid())
-  firstName      String
-  lastName       String
-  dateOfBirth    DateTime?
-  notes          String?
-  archived       Boolean       @default(false)
-  organizationId String
-  organization   Organization  @relation(fields: [organizationId], references: [id])
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id                  String               @id @default(uuid())
+  firstName           String
+  lastName            String
+  dateOfBirth         DateTime?
+  notes               String?
+  archived            Boolean              @default(false)
+  organizationId      String
+  organization        Organization         @relation(fields: [organizationId], references: [id])
+  scheduleAssignments ScheduleAssignment[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
 }
 
 model EnrollmentRequest {

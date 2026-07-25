@@ -12,6 +12,7 @@ export default defineConfig({
         "src/modules/auth/auth.service.ts",
         "src/modules/childProfiles/childProfiles.service.ts",
         "src/modules/enrollment/enrollment.service.ts",
+        "src/modules/schedules/schedules.service.ts",
       ],
       thresholds: {
         lines: 90,
