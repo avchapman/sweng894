@@ -4,6 +4,7 @@ import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import ChildProfilesPage from "./pages/ChildProfilesPage";
 import EnrollmentRequestsPage from "./pages/EnrollmentRequestsPage";
+import SchedulesPage from "./pages/SchedulesPage";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/child-profiles" element={<ChildProfilesPage />} />
         <Route path="/enrollment" element={<EnrollmentRequestsPage />} />
+        <Route path="/schedules" element={<SchedulesPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
