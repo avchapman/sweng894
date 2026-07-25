@@ -16,6 +16,7 @@ import {
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ChildCareIcon from "@mui/icons-material/ChildCare";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "../context/AuthContext";
 
@@ -36,6 +37,11 @@ const navItems = [
     label: "Enrollment",
     path: "/enrollment",
     icon: <AssignmentIcon />,
+  },
+  {
+    label: "Schedules",
+    path: "/schedules",
+    icon: <CalendarMonthIcon />,
   },
 ];
 
