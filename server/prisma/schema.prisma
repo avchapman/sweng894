@@ -20,6 +20,7 @@ model Organization {
   childProfiles      ChildProfile[]
   enrollmentRequests EnrollmentRequest[]
   scheduleEntries    ScheduleEntry[]
+  messages           Message[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 }
@@ -34,6 +35,8 @@ model User {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
   childLinks     ParentChildLink[]
+  createdMessages  Message[]          @relation("MessageAuthor")
+  receivedMessages MessageRecipient[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 }
@@ -88,6 +91,34 @@ model ParentChildLink {
 
   @@id([parentId, childProfileId])
   @@index([childProfileId])
+}
+
+model Message {
+  id             String             @id @default(uuid())
+  subject        String
+  body           String
+  status         String             @default("SENT")
+  sentAt         DateTime           @default(now())
+  organizationId String
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  createdById    String
+  createdBy      User               @relation("MessageAuthor", fields: [createdById], references: [id])
+  recipients     MessageRecipient[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([organizationId, sentAt])
+}
+
+model MessageRecipient {
+  messageId   String
+  recipientId String
+  message     Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  recipient   User     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  readAt      DateTime?
+
+  @@id([messageId, recipientId])
+  @@index([recipientId])
 }
 
 model EnrollmentRequest {

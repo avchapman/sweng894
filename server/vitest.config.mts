@@ -13,6 +13,8 @@ export default defineConfig({
         "src/modules/childProfiles/childProfiles.service.ts",
         "src/modules/enrollment/enrollment.service.ts",
         "src/modules/schedules/schedules.service.ts",
+        "src/modules/parentPortal/parentPortal.service.ts",
+        "src/modules/messages/messages.service.ts",
       ],
       thresholds: {
         lines: 90,

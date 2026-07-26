@@ -2,7 +2,7 @@
   "name": "childcare-platform",
   "private": true,
   "scripts": {
-    "dev": "concorrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
     "build": "npm run build --prefix server && npm run build --prefix client"
   },
   "devDependencies": {

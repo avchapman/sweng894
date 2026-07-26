@@ -18,6 +18,7 @@ import ChildCareIcon from "@mui/icons-material/ChildCare";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import LogoutIcon from "@mui/icons-material/Logout";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import { useAuth } from "../context/AuthContext";
 
 const drawerWidth = 260;
@@ -42,6 +43,11 @@ const staffNavItems = [
     label: "Schedules",
     path: "/schedules",
     icon: <CalendarMonthIcon />,
+  },
+  {
+    label: "Messages",
+    path: "/messages",
+    icon: <EmailOutlinedIcon />,
   },
 ];
 
