@@ -8,6 +8,7 @@ import EnrollmentRequestsPage from "./pages/EnrollmentRequestsPage";
 import SchedulesPage from "./pages/SchedulesPage";
 import ParentProfilePage from "./pages/ParentProfilePage";
 import ParentSchedulePage from "./pages/ParentSchedulePage";
+import MessagesPage from "./pages/MessagesPage";
 import { useAuth } from "./context/AuthContext";
 
 function HomeRedirect() {
@@ -66,6 +67,14 @@ export default function App() {
           element={
             <RoleRoute roles={["ADMIN", "STAFF"]}>
               <SchedulesPage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <RoleRoute roles={["ADMIN", "STAFF"]}>
+              <MessagesPage />
             </RoleRoute>
           }
         />
