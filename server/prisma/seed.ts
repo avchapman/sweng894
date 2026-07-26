@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { PrismaClient, UserRole } from "@prisma/client";
+import { InvoiceStatus, PrismaClient, UserRole } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const TEST_PASSWORD = "Password123!";
@@ -284,6 +284,91 @@ async function main() {
         },
       });
     }
+  }
+
+  const invoiceSeeds = [
+    {
+      invoiceNumber: "INV-2026-1001",
+      childName: "Emma Rivera",
+      amountCents: 125000,
+      dueDate: "2026-08-15",
+      status: InvoiceStatus.SENT,
+      description: "August preschool tuition",
+    },
+    {
+      invoiceNumber: "INV-2026-1002",
+      childName: "Mateo Rivera",
+      amountCents: 98000,
+      dueDate: "2026-08-15",
+      status: InvoiceStatus.PAID,
+      description: "August toddler program tuition",
+    },
+    {
+      invoiceNumber: "INV-2026-1003",
+      childName: "Noah Smith",
+      amountCents: 125000,
+      dueDate: "2026-07-15",
+      status: InvoiceStatus.OVERDUE,
+      description: "July preschool tuition",
+    },
+    {
+      invoiceNumber: "INV-2026-1004",
+      childName: "Ava Johnson",
+      amountCents: 125000,
+      dueDate: "2026-08-15",
+      status: InvoiceStatus.SENT,
+      description: "August preschool tuition",
+    },
+    {
+      invoiceNumber: "INV-2026-1005",
+      childName: "Liam Johnson",
+      amountCents: 98000,
+      dueDate: "2026-08-15",
+      status: InvoiceStatus.DRAFT,
+      description: "August toddler program tuition",
+    },
+    {
+      invoiceNumber: "INV-2026-1006",
+      childName: "Maya Patel",
+      amountCents: 4500,
+      dueDate: "2026-08-10",
+      status: InvoiceStatus.PAID,
+      description: "Field trip activity fee",
+    },
+  ];
+
+  for (const invoiceSeed of invoiceSeeds) {
+    const child = childByName.get(invoiceSeed.childName);
+    if (!child) throw new Error(`Missing seeded child ${invoiceSeed.childName}`);
+
+    await prisma.invoice.upsert({
+      where: {
+        organizationId_invoiceNumber: {
+          organizationId: organization.id,
+          invoiceNumber: invoiceSeed.invoiceNumber,
+        },
+      },
+      update: {
+        amountCents: invoiceSeed.amountCents,
+        dueDate: new Date(`${invoiceSeed.dueDate}T00:00:00.000Z`),
+        status: invoiceSeed.status,
+        description: invoiceSeed.description,
+        childProfileId: child.id,
+        paidAt:
+          invoiceSeed.status === InvoiceStatus.PAID ? new Date() : null,
+      },
+      create: {
+        organizationId: organization.id,
+        childProfileId: child.id,
+        invoiceNumber: invoiceSeed.invoiceNumber,
+        amountCents: invoiceSeed.amountCents,
+        dueDate: new Date(`${invoiceSeed.dueDate}T00:00:00.000Z`),
+        status: invoiceSeed.status,
+        description: invoiceSeed.description,
+        paidAt:
+          invoiceSeed.status === InvoiceStatus.PAID ? new Date() : null,
+      },
+    });
   }
 
   const enrollmentSeeds = [

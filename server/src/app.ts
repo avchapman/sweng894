@@ -9,6 +9,7 @@ import enrollmentRoutes from "./modules/enrollment/enrollment.routes";
 import scheduleRoutes from "./modules/schedules/schedules.routes";
 import parentPortalRoutes from "./modules/parentPortal/parentPortal.routes";
 import messageRoutes from "./modules/messages/messages.routes";
+import invoiceRoutes from "./modules/invoices/invoices.routes";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/api/enrollment", enrollmentRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/parent", parentPortalRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/invoices", invoiceRoutes);
 
 /**
  * @openapi

@@ -4,6 +4,7 @@ import {
   getLinkedChildren,
   getLinkedChildSchedules,
 } from "./parentPortal.service";
+import { getParentInvoices } from "../invoices/invoices.service";
 
 export async function listLinkedChildren(
   req: AuthenticatedRequest,
@@ -25,4 +26,15 @@ export async function listLinkedChildSchedules(
     req.user!.organizationId
   );
   return res.json(schedules);
+}
+
+export async function listLinkedChildInvoices(
+  req: AuthenticatedRequest,
+  res: Response
+) {
+  const invoices = await getParentInvoices(
+    req.user!.userId,
+    req.user!.organizationId
+  );
+  return res.json(invoices);
 }
