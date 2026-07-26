@@ -22,7 +22,7 @@ import { useAuth } from "../context/AuthContext";
 
 const drawerWidth = 260;
 
-const navItems = [
+const staffNavItems = [
   {
     label: "Dashboard",
     path: "/dashboard",
@@ -49,6 +49,21 @@ export default function AppLayout() {
   const { token, logout, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isParent = user?.role === "PARENT";
+  const navItems = isParent
+    ? [
+        {
+          label: "Child Profile",
+          path: "/my-child",
+          icon: <ChildCareIcon />,
+        },
+        {
+          label: "Schedule",
+          path: "/my-schedule",
+          icon: <CalendarMonthIcon />,
+        },
+      ]
+    : staffNavItems;
 
   if (!token) {
     return <Navigate to="/login" replace />;
