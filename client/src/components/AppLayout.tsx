@@ -19,6 +19,7 @@ import AssignmentIcon from "@mui/icons-material/Assignment";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import LogoutIcon from "@mui/icons-material/Logout";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import { useAuth } from "../context/AuthContext";
 
 const drawerWidth = 260;
@@ -49,6 +50,11 @@ const staffNavItems = [
     path: "/messages",
     icon: <EmailOutlinedIcon />,
   },
+  {
+    label: "Billing",
+    path: "/invoices",
+    icon: <ReceiptLongOutlinedIcon />,
+  },
 ];
 
 export default function AppLayout() {
@@ -67,6 +73,11 @@ export default function AppLayout() {
           label: "Schedule",
           path: "/my-schedule",
           icon: <CalendarMonthIcon />,
+        },
+        {
+          label: "Invoices",
+          path: "/my-invoices",
+          icon: <ReceiptLongOutlinedIcon />,
         },
       ]
     : staffNavItems;

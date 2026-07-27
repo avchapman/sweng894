@@ -18,6 +18,10 @@ import BusinessIcon from "@mui/icons-material/Business";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
+import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
+import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
@@ -30,6 +34,27 @@ type EnrollmentRequest = {
   status: string;
 };
 
+type BillingMetrics = {
+  invoiceCount: number;
+  paidCents: number;
+  outstandingCents: number;
+  overdueCount: number;
+};
+
+const emptyBillingMetrics: BillingMetrics = {
+  invoiceCount: 0,
+  paidCents: 0,
+  outstandingCents: 0,
+  overdueCount: 0,
+};
+
+function formatCurrency(amountCents: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amountCents / 100);
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -40,19 +65,23 @@ export default function DashboardPage() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [billingMetrics, setBillingMetrics] =
+    useState<BillingMetrics>(emptyBillingMetrics);
 
   async function loadDashboardData() {
     setLoading(true);
     setError("");
 
     try {
-      const [childrenResponse, enrollmentResponse] = await Promise.all([
+      const [childrenResponse, enrollmentResponse, billingResponse] = await Promise.all([
         apiClient.get("/child-profiles"),
         apiClient.get("/enrollment"),
+        apiClient.get("/invoices/metrics"),
       ]);
 
       setChildren(childrenResponse.data);
       setEnrollmentRequests(enrollmentResponse.data);
+      setBillingMetrics(billingResponse.data);
     } catch {
       setError("Unable to load dashboard data. Please try again.");
     } finally {
@@ -200,6 +229,70 @@ export default function DashboardPage() {
                   color="primary"
                   sx={{ width: "fit-content" }}
                 />
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      <Box>
+        <Typography variant="h5">Billing Overview</Typography>
+        <Typography color="text.secondary">
+          Current invoice activity for your organization.
+        </Typography>
+      </Box>
+
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+          <Card>
+            <CardContent>
+              <Stack spacing={1}>
+                <ReceiptLongOutlinedIcon color="primary" />
+                <Typography variant="h6">Active Invoices</Typography>
+                <Typography variant="h4">{billingMetrics.invoiceCount}</Typography>
+                <Button variant="outlined" onClick={() => navigate("/invoices")}>
+                  View Billing
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+          <Card>
+            <CardContent>
+              <Stack spacing={1}>
+                <PaidOutlinedIcon color="success" />
+                <Typography variant="h6">Paid</Typography>
+                <Typography variant="h4">
+                  {formatCurrency(billingMetrics.paidCents)}
+                </Typography>
+                <Typography color="text.secondary">Collected payments</Typography>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+          <Card>
+            <CardContent>
+              <Stack spacing={1}>
+                <AccountBalanceWalletOutlinedIcon color="warning" />
+                <Typography variant="h6">Outstanding</Typography>
+                <Typography variant="h4">
+                  {formatCurrency(billingMetrics.outstandingCents)}
+                </Typography>
+                <Typography color="text.secondary">Unpaid balance</Typography>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
+          <Card>
+            <CardContent>
+              <Stack spacing={1}>
+                <ReportProblemOutlinedIcon color="error" />
+                <Typography variant="h6">Overdue</Typography>
+                <Typography variant="h4">{billingMetrics.overdueCount}</Typography>
+                <Typography color="text.secondary">Invoices requiring follow-up</Typography>
               </Stack>
             </CardContent>
           </Card>

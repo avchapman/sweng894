@@ -9,6 +9,8 @@ import SchedulesPage from "./pages/SchedulesPage";
 import ParentProfilePage from "./pages/ParentProfilePage";
 import ParentSchedulePage from "./pages/ParentSchedulePage";
 import MessagesPage from "./pages/MessagesPage";
+import InvoicesPage from "./pages/InvoicesPage";
+import ParentInvoicesPage from "./pages/ParentInvoicesPage";
 import { useAuth } from "./context/AuthContext";
 
 function HomeRedirect() {
@@ -79,6 +81,14 @@ export default function App() {
           }
         />
         <Route
+          path="/invoices"
+          element={
+            <RoleRoute roles={["ADMIN", "STAFF"]}>
+              <InvoicesPage />
+            </RoleRoute>
+          }
+        />
+        <Route
           path="/my-child"
           element={
             <RoleRoute roles={["PARENT"]}>
@@ -91,6 +101,14 @@ export default function App() {
           element={
             <RoleRoute roles={["PARENT"]}>
               <ParentSchedulePage />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/my-invoices"
+          element={
+            <RoleRoute roles={["PARENT"]}>
+              <ParentInvoicesPage />
             </RoleRoute>
           }
         />
