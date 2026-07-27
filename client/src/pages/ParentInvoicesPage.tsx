@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import apiClient from "../api/client";
+import { formatCurrency, formatDate } from "../utils/billingFormat";
 
 type ParentInvoice = {
   id: string;
@@ -25,22 +26,6 @@ type ParentInvoice = {
     lastName: string;
   };
 };
-
-function formatCurrency(amountCents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amountCents / 100);
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(value));
-}
 
 function statusColor(status: ParentInvoice["status"]) {
   if (status === "PAID") return "success";
@@ -132,7 +117,7 @@ export default function ParentInvoicesPage() {
                       {formatCurrency(invoice.amountCents)}
                     </Typography>
                     <Typography color="text.secondary">
-                      Due {formatDate(invoice.dueDate)}
+                      Due {formatDate(invoice.dueDate, "long")}
                     </Typography>
                     <Chip
                       label={invoice.status}
