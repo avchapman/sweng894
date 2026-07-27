@@ -24,6 +24,7 @@ import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import type { GridColDef } from "@mui/x-data-grid";
 import { isAxiosError } from "axios";
 import apiClient from "../api/client";
+import { formatCurrency, formatDate } from "../utils/billingFormat";
 
 const invoiceStatuses = ["DRAFT", "SENT", "PAID", "OVERDUE", "VOID"] as const;
 type InvoiceStatus = (typeof invoiceStatuses)[number];
@@ -61,22 +62,6 @@ const emptyForm: InvoiceForm = {
   description: "",
   status: "DRAFT",
 };
-
-function formatCurrency(amountCents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amountCents / 100);
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(value));
-}
 
 function getApiError(error: unknown, fallback: string) {
   if (isAxiosError(error) && typeof error.response?.data?.message === "string") {

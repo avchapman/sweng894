@@ -15,6 +15,7 @@ export default defineConfig({
         "src/modules/schedules/schedules.service.ts",
         "src/modules/parentPortal/parentPortal.service.ts",
         "src/modules/messages/messages.service.ts",
+        "src/modules/invoices/invoices.service.ts",
       ],
       thresholds: {
         lines: 90,

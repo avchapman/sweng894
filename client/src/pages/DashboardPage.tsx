@@ -24,6 +24,7 @@ import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalance
 import ReportProblemOutlinedIcon from "@mui/icons-material/ReportProblemOutlined";
 import apiClient from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { formatCurrency } from "../utils/billingFormat";
 
 type ChildProfile = {
   id: string;
@@ -47,13 +48,6 @@ const emptyBillingMetrics: BillingMetrics = {
   outstandingCents: 0,
   overdueCount: 0,
 };
-
-function formatCurrency(amountCents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amountCents / 100);
-}
 
 export default function DashboardPage() {
   const { user } = useAuth();
