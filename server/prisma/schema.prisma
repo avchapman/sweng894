@@ -30,6 +30,7 @@ model Organization {
   scheduleEntries    ScheduleEntry[]
   messages           Message[]
   invoices           Invoice[]
+  programCapacities  ProgramCapacity[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 }
@@ -158,10 +159,34 @@ model EnrollmentRequest {
   phone          String?
   childName      String
   childAge       Int?
+  requestedStartDate      DateTime?
+  requestedProgram        String?
+  requestedAttendanceDays String[]      @default([])
+  siblingEnrolled         Boolean       @default(false)
   message        String?
   status         String        @default("NEW")
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId, requestedProgram])
+}
+
+model ProgramCapacity {
+  id                       String       @id @default(uuid())
+  programName              String
+  minimumAgeYears          Int
+  maximumAgeYears          Int
+  supportedAttendanceDays String[]
+  totalCapacity            Int
+  occupiedSeats            Int          @default(0)
+  effectiveDate            DateTime
+  organizationId           String
+  organization             Organization @relation(fields: [organizationId], references: [id])
+  createdAt                DateTime     @default(now())
+  updatedAt                DateTime     @updatedAt
+
+  @@unique([organizationId, programName, effectiveDate])
+  @@index([organizationId, effectiveDate])
 }
