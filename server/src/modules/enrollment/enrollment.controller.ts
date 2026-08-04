@@ -17,7 +17,18 @@ export async function createEnrollmentRequestHandler(
   req: Request,
   res: Response
 ) {
-  const { parentName, email, phone, childName, childAge, message } = req.body;
+  const {
+    parentName,
+    email,
+    phone,
+    childName,
+    childAge,
+    requestedStartDate,
+    requestedProgram,
+    requestedAttendanceDays,
+    siblingEnrolled,
+    message,
+  } = req.body;
 
   if (!parentName || !email || !childName) {
     return res.status(400).json({
@@ -31,6 +42,10 @@ export async function createEnrollmentRequestHandler(
     phone,
     childName,
     childAge,
+    requestedStartDate,
+    requestedProgram,
+    requestedAttendanceDays,
+    siblingEnrolled,
     message,
   });
 

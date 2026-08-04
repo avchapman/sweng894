@@ -39,6 +39,10 @@ describe("enrollment service", () => {
         phone: undefined,
         childName: "Avery Lee",
         childAge: 4,
+        requestedStartDate: undefined,
+        requestedProgram: undefined,
+        requestedAttendanceDays: [],
+        siblingEnrolled: false,
         message: undefined,
       },
     });

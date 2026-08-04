@@ -16,6 +16,8 @@ export default defineConfig({
         "src/modules/parentPortal/parentPortal.service.ts",
         "src/modules/messages/messages.service.ts",
         "src/modules/invoices/invoices.service.ts",
+        "src/modules/programCapacities/programCapacities.service.ts",
+        "src/modules/enrollmentRecommendations/enrollmentRecommendations.algorithm.ts",
       ],
       thresholds: {
         lines: 90,

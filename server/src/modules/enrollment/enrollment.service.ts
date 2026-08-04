@@ -6,6 +6,10 @@ type CreateEnrollmentRequestInput = {
   phone?: string;
   childName: string;
   childAge?: number;
+  requestedStartDate?: string;
+  requestedProgram?: string;
+  requestedAttendanceDays?: string[];
+  siblingEnrolled?: boolean;
   message?: string;
 };
 
@@ -17,6 +21,12 @@ export async function createEnrollmentRequest(data: CreateEnrollmentRequestInput
       phone: data.phone,
       childName: data.childName,
       childAge: data.childAge,
+      requestedStartDate: data.requestedStartDate
+        ? new Date(data.requestedStartDate)
+        : undefined,
+      requestedProgram: data.requestedProgram?.trim() || undefined,
+      requestedAttendanceDays: data.requestedAttendanceDays ?? [],
+      siblingEnrolled: data.siblingEnrolled ?? false,
       message: data.message,
     },
   });

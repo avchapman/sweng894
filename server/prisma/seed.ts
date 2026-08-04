@@ -378,6 +378,10 @@ async function main() {
       phone: "555-0101",
       childName: "Ethan Davis",
       childAge: 4,
+      requestedStartDate: "2026-08-15",
+      requestedProgram: "Preschool",
+      requestedAttendanceDays: ["MONDAY", "WEDNESDAY", "FRIDAY"],
+      siblingEnrolled: false,
       message: "Interested in the preschool program.",
       status: "NEW",
     },
@@ -387,6 +391,10 @@ async function main() {
       phone: "555-0102",
       childName: "Harper Wilson",
       childAge: 3,
+      requestedStartDate: "2026-09-01",
+      requestedProgram: "Preschool",
+      requestedAttendanceDays: ["TUESDAY", "THURSDAY"],
+      siblingEnrolled: true,
       message: "Would like to schedule a tour.",
       status: "CONTACTED",
     },
@@ -396,6 +404,10 @@ async function main() {
       phone: "555-0103",
       childName: "Leo Kim",
       childAge: 2,
+      requestedStartDate: "2026-08-20",
+      requestedProgram: "Toddler",
+      requestedAttendanceDays: ["MONDAY", "WEDNESDAY", "FRIDAY"],
+      siblingEnrolled: false,
       message: "Asking about toddler availability.",
       status: "NEW",
     },
@@ -405,6 +417,10 @@ async function main() {
       phone: "555-0104",
       childName: "Isabella Garcia",
       childAge: 5,
+      requestedStartDate: "2026-09-08",
+      requestedProgram: "Pre-K",
+      requestedAttendanceDays: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"],
+      siblingEnrolled: false,
       message: "Needs information about fall enrollment.",
       status: "CONTACTED",
     },
@@ -414,6 +430,10 @@ async function main() {
       phone: "555-0105",
       childName: "Henry Thompson",
       childAge: 3,
+      requestedStartDate: "2026-08-25",
+      requestedProgram: "Preschool",
+      requestedAttendanceDays: ["MONDAY", "WEDNESDAY", "FRIDAY"],
+      siblingEnrolled: false,
       message: "Interested in part-time care.",
       status: "NEW",
     },
@@ -423,6 +443,10 @@ async function main() {
       phone: "555-0106",
       childName: "Mia Anderson",
       childAge: 4,
+      requestedStartDate: "2026-08-10",
+      requestedProgram: "Preschool",
+      requestedAttendanceDays: ["MONDAY", "WEDNESDAY", "FRIDAY"],
+      siblingEnrolled: true,
       message: "Requested tuition and schedule details.",
       status: "ENROLLED",
     },
@@ -438,13 +462,74 @@ async function main() {
     if (existing) {
       await prisma.enrollmentRequest.update({
         where: { id: existing.id },
-        data: { ...request, organizationId: organization.id },
+        data: {
+          ...request,
+          requestedStartDate: new Date(`${request.requestedStartDate}T00:00:00.000Z`),
+          organizationId: organization.id,
+        },
       });
     } else {
       await prisma.enrollmentRequest.create({
-        data: { ...request, organizationId: organization.id },
+        data: {
+          ...request,
+          requestedStartDate: new Date(`${request.requestedStartDate}T00:00:00.000Z`),
+          organizationId: organization.id,
+        },
       });
     }
+  }
+
+  const capacitySeeds = [
+    {
+      programName: "Toddler",
+      minimumAgeYears: 1,
+      maximumAgeYears: 2,
+      supportedAttendanceDays: ["MONDAY", "WEDNESDAY", "FRIDAY"],
+      totalCapacity: 8,
+      occupiedSeats: 7,
+    },
+    {
+      programName: "Preschool",
+      minimumAgeYears: 3,
+      maximumAgeYears: 4,
+      supportedAttendanceDays: [
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+      ],
+      totalCapacity: 18,
+      occupiedSeats: 15,
+    },
+    {
+      programName: "Pre-K",
+      minimumAgeYears: 4,
+      maximumAgeYears: 5,
+      supportedAttendanceDays: [
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+      ],
+      totalCapacity: 16,
+      occupiedSeats: 15,
+    },
+  ];
+  const effectiveDate = new Date("2026-08-01T00:00:00.000Z");
+  for (const capacity of capacitySeeds) {
+    await prisma.programCapacity.upsert({
+      where: {
+        organizationId_programName_effectiveDate: {
+          organizationId: organization.id,
+          programName: capacity.programName,
+          effectiveDate,
+        },
+      },
+      update: capacity,
+      create: { ...capacity, organizationId: organization.id, effectiveDate },
+    });
   }
 
   console.log("Demo seed completed successfully.");
@@ -452,6 +537,7 @@ async function main() {
   console.log(`Active children: ${childSeeds.length}`);
   console.log(`Schedule entries: ${scheduleSeeds.length}`);
   console.log(`Enrollment requests: ${enrollmentSeeds.length}`);
+  console.log(`Program capacities: ${capacitySeeds.length}`);
   console.log(`All test accounts use password: ${TEST_PASSWORD}`);
 }
 
